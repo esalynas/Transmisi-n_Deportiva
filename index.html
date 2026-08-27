@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tablero de Desempeño Deportivo - Central</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: white; margin: 0; padding: 20px; }
+        .tablero-container { display: flex; flex-direction: column; align-items: center; }
+
+        /* Estilos del Marcador */
+        .tablero { background: linear-gradient(135deg, #004d40, #00251a); color: white; padding: 15px 30px; border-radius: 12px; display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: center; width: 80%; max-width: 800px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .equipo { display: flex; align-items: center; font-size: 22px; font-weight: bold; }
+        .escudo { width: 45px; height: 45px; border-radius: 50%; margin: 0 15px; display: flex; justify-content: center; align-items: center; font-size: 20px; font-weight: bold; color: white;}
+        .marcador { font-size: 42px; font-weight: bold; color: #ffeb3b; }
+        .tiempo { font-size: 18px; color: #80cbc4; text-align: center; }
+
+        /* Zona de Presentación */
+        #zonaPresentacion { width: 80%; max-width: 800px; height: 500px; background-color: #1e1e1e; border: 2px dashed #00796b; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 20px; color: #aaa; margin-bottom: 20px; overflow: hidden;}
+        #visorIframe { width: 100%; height: 100%; border: none; display: none; }
+
+        /* Panel del Líder */
+        #panelLider { width: 80%; max-width: 800px; background-color: #263238; padding: 20px; border-radius: 12px; margin-top: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);}
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #80cbc4;}
+        select, button, input[type="text"] { padding: 10px; font-size: 16px; border-radius: 6px; border: 1px solid #37474f; background-color: #1e1e1e; color: white;}
+        button { background-color: #00897b; color: white; cursor: pointer; border: none; font-weight: bold; }
+        button:hover { background-color: #004d40; }
+        .btn-gol { background-color: #2e7d32; }
+        .btn-autogol { background-color: #c62828; }
+
+        /* Estilos Tabla Clasificación */
+        #tablaClasificacion { width: 80%; max-width: 800px; border-collapse: collapse; margin-top: 20px; background-color: #1e1e1e; border-radius: 8px; overflow: hidden;}
+        #tablaClasificacion th, #tablaClasificacion td { text-align: left; padding: 12px; border-bottom: 1px solid #37474f; }
+        #tablaClasificacion th { background-color: #263238; color: #80cbc4;}
+        .escudo-tabla { width: 25px; height: 25px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; font-size: 14px; font-weight: bold; margin-right: 10px; color: white;}
+
+        /* Zona de Registro (para Equipos) */
+        #zonaRegistro { display: none; width: 80%; max-width: 800px; background-color: #263238; padding: 20px; border-radius: 12px; margin-top: 20px; text-align: center;}
+        #qrcode { margin-top: 20px; display: flex; justify-content: center; }
+    </style>
+    <!-- Librería para generar QR -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+    <div class="tablero-container">
+        <!-- Interfaz de Visualización Central (Lo que todos ven) -->
+        <div id="visor">
+            <div class="tablero">
+                <div class="equipo">
+                    <div class="escudo" id="colorA">A</div>
+                    <span id="nombreA">Seleccione Equipo</span>
+                </div>
+                <div style="text-align: center;">
+                    <div><span class="marcador" id="golesA">0</span> <span style="font-size:24px; color:white;">-</span> <span class="marcador" id="golesB">0</span></div>
+                    <div class="tiempo" id="cronometro">00:00</div>
+                </div>
+                <div class="equipo" style="justify-content: flex-end;">
+                    <span id="nombreB">Evaluación (Líder)</span>
+                    <div class="escudo" id="colorB" style="background-color: #555;">L</div>
+                </div>
+            </div>
+
+            <div id="zonaPresentacion">
+                <span id="instruccionPresentacion">Esperando inicio de partido...</span>
+                <iframe id="visorIframe"></iframe>
+            </div>
+
+            <table id="tablaClasificacion">
+                <thead>
+                    <tr>
+                        <th>Pos.</th>
+                        <th>Equipo</th>
+                        <th>Goles (Favor)</th>
+                        <th>Autogoles (Contra)</th>
+                        <th>Diferencia</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Filas dinámicas -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Panel del Líder (Solo tú accedes) -->
+        <div id="panelLider">
+            <h3>⚙️ Panel del Líder (Árbitro)</h3>
+            
+            <!-- Acceso con Contraseña -->
+            <div id="loginLider">
+                <input type="password" id="passwordInput" placeholder="Contraseña de Líder">
+                <button id="btnAcceso">Acceder</button>
+            </div>
+
+            <!-- Controles (Ocultos inicialmente) -->
+            <div id="controlesLider" style="display: none;">
+                <div class="input-group">
+                    <label>Equipos Registrados (Alineación):</label>
+                    <select id="selectEquipoJuego">
+                        <option value="">-- No hay equipos con enlaces --</option>
+                    </select>
+                    <button id="btnEmpezarPartido">▶ Empezar Partido</button>
+                    <button id="btnTerminarPartido">⏹️ Terminar</button>
+                </div>
+
+                <div class="input-group">
+                    <label>Acciones de Calificación en Vivo:</label>
+                    <button class="btn-gol" id="btnGolA">⚽ ¡Gol para el Equipo!</button>
+                    <button class="btn-autogol" id="btnAutoGolA">⚠️ Autogol (Punto en Contra)</button>
+                </div>
+                
+                <div class="input-group">
+                    <button id="btnMostrarRegistro">📢 Mostrar QR para Registro de Equipos</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Zona de Registro (Para que los equipos peguen su enlace) -->
+        <div id="zonaRegistro">
+            <h3>📝 Registro de Enlace de Presentación</h3>
+            <p>Escanea el QR o usa el enlace para registrar el trabajo de tu equipo.</p>
+            
+            <div class="input-group">
+                <select id="selectEquipoRegistro">
+                    <option value="">-- Selecciona tu Equipo --</option>
+                    <!-- Opciones dinámicas -->
+                </select>
+            </div>
+            <div class="input-group">
+                <input type="text" id="urlPresentacion" placeholder="Pega el ENLACE PÚBLICO de tu presentación">
+            </div>
+            <button id="btnRegistrarEnlace">Registrar Enlace</button>
+            <button id="btnVolverVisor" style="background-color: #555; margin-top: 10px;">Volver al Tablero Principal</button>
+
+            <div id="qrcode"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Configuración y Datos ---
+        const equipos = [
+            { id: 1, nombre: "Equipo 1", color: "#e74c3c" },
+            { id: 2, nombre: "Equipo 2", color: "#3498db" },
+            { id: 3, nombre: "Equipo 3", color: "#2ecc71" },
+            { id: 4, nombre: "Equipo 4", color: "#f1c40f" },
+            { id: 5, nombre: "Equipo 5", color: "#9b59b6" }
+        ];
+
+        // Simulador de persistencia de datos (EN UN CASO REAL, ESTO DEBE SER UN BACKEND)
+        // Para GitHub Pages, si recargas la página, estos datos SE PIERDEN.
+        let datosEquipos = JSON.parse(localStorage.getItem('datosEquiposSport')) || {};
+        equipos.forEach(equipo => {
+            if (!datosEquipos[equipo.id]) {
+                datosEquipos[equipo.id] = { url: null, goles: 0, autogoles: 0 };
+            }
+        });
+
+        let partidoActivo = { equipoId: null, goles: 0, autogoles: 0, tiempoInicio: null };
+        let intervaloTiempo = null;
+        const contrasenaMaestra = "1234"; // ¡Cambia esto por tu contraseña segura!
+
+        // --- Elementos del DOM ---
+        // Visor
+        const nombreA = document.getElementById('nombreA');
+        const golesA = document.getElementById('golesA');
+        const golesB = document.getElementById('golesB');
+        const colorA = document.getElementById('colorA');
+        const cronometro = document.getElementById('cronometro');
+        const visorIframe = document.getElementById('visorIframe');
+        const instruccionPresentacion = document.getElementById('instruccionPresentacion');
+        const tablaClasificacionBody = document.querySelector('#tablaClasificacion tbody');
+
+        // Panel Líder
+        const panelLider = document.getElementById('panelLider');
+        const loginLider = document.getElementById('loginLider');
+        const controlesLider = document.getElementById('controlesLider');
+        const passwordInput = document.getElementById('passwordInput');
+        const selectEquipoJuego = document.getElementById('selectEquipoJuego');
+
+        // Zona Registro
+        const zonaRegistro = document.getElementById('zonaRegistro');
+        const visor = document.getElementById('visor');
+        const selectEquipoRegistro = document.getElementById('selectEquipoRegistro');
+        const urlPresentacion = document.getElementById('urlPresentacion');
+        const qrContainer = document.getElementById('qrcode');
+
+        // --- Funciones de Inicialización y Persistencia ---
+        function guardarDatos() {
+            localStorage.setItem('datosEquiposSport', JSON.stringify(datosEquipos));
+        }
+
+        function cargarEquiposEnSelects() {
+            selectEquipoRegistro.innerHTML = '<option value="">-- Selecciona tu Equipo --</option>';
+            equipos.forEach(equipo => {
+                const option = document.createElement('option');
+                option.value = equipo.id;
+                option.textContent = equipo.nombre;
+                selectEquipoRegistro.appendChild(option);
+            });
+            actualizarSelectJuego();
+        }
+
+        function actualizarSelectJuego() {
+            selectEquipoJuego.innerHTML = '<option value="">-- No hay equipos con enlaces --</option>';
+            let hayEquipos = false;
+            equipos.forEach(equipo => {
+                if (datosEquipos[equipo.id].url) {
+                    const option = document.createElement('option');
+                    option.value = equipo.id;
+                    option.textContent = equipo.nombre;
+                    selectEquipoJuego.appendChild(option);
+                    hayEquipos = true;
+                }
+            });
+            if (hayEquipos && selectEquipoJuego.options[0].value === "") {
+                 selectEquipoJuego.remove(0); // Quitar la opción por defecto si hay equipos
+            }
+        }
+
+        // --- Funciones del Visor y Tabla ---
+        function actualizarVisor() {
+            if (partidoActivo.equipoId) {
+                const equipo = equipos.find(e => e.id == partidoActivo.equipoId);
+                nombreA.textContent = equipo.nombre;
+                colorA.style.backgroundColor = equipo.color;
+                colorA.textContent = equipo.nombre.charAt(0);
+                golesA.textContent = partidoActivo.goles;
+                golesB.textContent = partidoActivo.autogoles;
+
+                instruccionPresentacion.style.display = 'none';
+                visorIframe.style.display = 'block';
+                // Intentar cargar la URL en el iframe. Nota: Muchos sitios bloquean iframes (Google Drive/Slides, etc.)
+                // Si bloquea, el líder debe hacer clic en "Abrir en nueva pestaña" (se puede añadir un botón)
+                visorIframe.src = datosEquipos[partidoActivo.equipoId].url;
+
+            } else {
+                nombreA.textContent = "Seleccione Equipo";
+                colorA.style.backgroundColor = "#ccc";
+                colorA.textContent = "A";
+                golesA.textContent = 0;
+                golesB.textContent = 0;
+                cronometro.textContent = "00:00";
+                instruccionPresentacion.style.display = 'block';
+                visorIframe.style.display = 'none';
+                visorIframe.src = "";
+            }
+        }
+
+        function actualizarTiempo() {
+            if (partidoActivo.tiempoInicio) {
+                const diferenciaMs = new Date() - partidoActivo.tiempoInicio;
+                const totalSegundos = Math.floor(diferenciaMs / 1000);
+                const minutos = String(Math.floor(totalSegundos / 60)).padStart(2, '0');
+                const segundos = String(totalSegundos % 60).padStart(2, '0');
+                cronometro.textContent = `${minutos}:${segundos}`;
+            }
+        }
+
+        function actualizarTabla() {
+            tablaClasificacionBody.innerHTML = '';
+            
+            const listaEquipos = equipos.map(equipo => {
+                const datos = datosEquipos[equipo.id];
+                return {
+                    ...equipo,
+                    ...datos,
+                    diferencia: datos.goles - datos.autogoles
+                };
+            }).sort((a, b) => (b.goles - b.autogoles) - (a.goles - a.autogoles)); // Ordenar por diferencia
+
+            listaEquipos.forEach((equipo, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><div class="escudo-tabla" style="background-color: ${equipo.color}">${equipo.nombre.charAt(0)}</div>${equipo.nombre}</td>
+                    <td>${equipo.goles}</td>
+                    <td>${equipo.autogoles}
