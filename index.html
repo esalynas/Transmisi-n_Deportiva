@@ -2,278 +2,442 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tablero de Desempeño Deportivo - Central</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Liga de Desempeño & Mejora Continua</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: white; margin: 0; padding: 20px; }
-        .tablero-container { display: flex; flex-direction: column; align-items: center; }
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-gold: #f59e0b;
+            --text-main: #f8fafc;
+        }
 
-        /* Estilos del Marcador */
-        .tablero { background: linear-gradient(135deg, #004d40, #00251a); color: white; padding: 15px 30px; border-radius: 12px; display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: center; width: 80%; max-width: 800px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        .equipo { display: flex; align-items: center; font-size: 22px; font-weight: bold; }
-        .escudo { width: 45px; height: 45px; border-radius: 50%; margin: 0 15px; display: flex; justify-content: center; align-items: center; font-size: 20px; font-weight: bold; color: white;}
-        .marcador { font-size: 42px; font-weight: bold; color: #ffeb3b; }
-        .tiempo { font-size: 18px; color: #80cbc4; text-align: center; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-main); padding: 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
 
-        /* Zona de Presentación */
-        #zonaPresentacion { width: 80%; max-width: 800px; height: 500px; background-color: #1e1e1e; border: 2px dashed #00796b; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 20px; color: #aaa; margin-bottom: 20px; overflow: hidden;}
-        #visorIframe { width: 100%; height: 100%; border: none; display: none; }
+        /* --- NAVEGACIÓN Y SECCIONES --- */
+        .nav-tabs { display: flex; gap: 8px; width: 100%; max-width: 900px; margin-bottom: 12px; }
+        .nav-btn { flex: 1; padding: 12px 5px; border: none; background: #334155; color: white; font-weight: bold; font-size: 0.85rem; border-radius: 8px; cursor: pointer; text-align: center; }
+        .nav-btn.active { background: #0284c7; }
 
-        /* Panel del Líder */
-        #panelLider { width: 80%; max-width: 800px; background-color: #263238; padding: 20px; border-radius: 12px; margin-top: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);}
-        .input-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #80cbc4;}
-        select, button, input[type="text"] { padding: 10px; font-size: 16px; border-radius: 6px; border: 1px solid #37474f; background-color: #1e1e1e; color: white;}
-        button { background-color: #00897b; color: white; cursor: pointer; border: none; font-weight: bold; }
-        button:hover { background-color: #004d40; }
-        .btn-gol { background-color: #2e7d32; }
-        .btn-autogol { background-color: #c62828; }
+        .section-view { display: none; width: 100%; max-width: 900px; }
+        .section-view.active { display: block; }
 
-        /* Estilos Tabla Clasificación */
-        #tablaClasificacion { width: 80%; max-width: 800px; border-collapse: collapse; margin-top: 20px; background-color: #1e1e1e; border-radius: 8px; overflow: hidden;}
-        #tablaClasificacion th, #tablaClasificacion td { text-align: left; padding: 12px; border-bottom: 1px solid #37474f; }
-        #tablaClasificacion th { background-color: #263238; color: #80cbc4;}
-        .escudo-tabla { width: 25px; height: 25px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; font-size: 14px; font-weight: bold; margin-right: 10px; color: white;}
+        /* --- MARCADOR TIPO TRANSMISIÓN DEPORTIVA (MOBILE FIRST) --- */
+        .scoreboard {
+            background: linear-gradient(135deg, #022c22 0%, #0f172a 100%);
+            border: 2px solid #059669;
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            margin-bottom: 15px;
+        }
 
-        /* Zona de Registro (para Equipos) */
-        #zonaRegistro { display: none; width: 80%; max-width: 800px; background-color: #263238; padding: 20px; border-radius: 12px; margin-top: 20px; text-align: center;}
-        #qrcode { margin-top: 20px; display: flex; justify-content: center; }
+        .match-header { text-align: center; font-size: 0.75rem; color: #6ee7b7; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+
+        .teams-container { display: flex; justify-content: space-between; align-items: center; }
+        .team-box { display: flex; align-items: center; gap: 8px; flex: 1; }
+        .team-box.away { justify-content: flex-end; }
+        
+        .team-badge { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1rem; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+        .team-name { font-size: 0.95rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px; }
+
+        .score-box { display: flex; flex-direction: column; align-items: center; padding: 0 10px; }
+        .score-numbers { font-size: 1.8rem; font-weight: 900; color: var(--accent-gold); letter-spacing: 2px; }
+        .match-time { font-size: 0.75rem; background: #ef4444; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold; animation: pulse 1.5s infinite; }
+
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+        /* --- PRESENTACIÓN ESTÁNDAR TIPO SLIDES --- */
+        .slide-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            border-top: 6px solid #38bdf8;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            min-height: 420px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .slide-title { font-size: 1.2rem; font-weight: 800; color: #38bdf8; margin-bottom: 4px; }
+        .slide-subtitle { font-size: 0.9rem; color: #94a3b8; margin-bottom: 12px; }
+
+        .evidences-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
+        .evidence-box { background: #0f172a; border-radius: 8px; padding: 8px; text-align: center; }
+        .evidence-box h5 { font-size: 0.75rem; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .evidence-box.before h5 { color: #f87171; }
+        .evidence-box.after h5 { color: #34d399; }
+        .evidence-img { width: 100%; height: 130px; object-fit: cover; border-radius: 6px; background: #1e293b; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 0.75rem; }
+
+        /* --- FORMULARIOS Y CONTROLES (MOBILE OPTIMIZED) --- */
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-size: 0.8rem; font-weight: 600; color: #cbd5e1; margin-bottom: 4px; }
+        input, select, textarea { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; font-size: 0.9rem; }
+        textarea { resize: vertical; height: 60px; }
+
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; font-size: 0.9rem; cursor: pointer; margin-top: 6px; }
+        .btn-green { background: var(--accent-green); color: white; }
+        .btn-red { background: var(--accent-red); color: white; }
+        .btn-blue { background: #0284c7; color: white; }
+
+        /* --- TABLA DE POSICIONES --- */
+        .standings-table { width: 100%; border-collapse: collapse; margin-top: 15px; background: var(--card-bg); border-radius: 8px; overflow: hidden; font-size: 0.85rem; }
+        .standings-table th, .standings-table td { padding: 10px 8px; text-align: center; border-bottom: 1px solid #334155; }
+        .standings-table th { background: #0f172a; color: #94a3b8; font-weight: 700; }
+        .standings-table td.team-cell { text-align: left; display: flex; align-items: center; gap: 6px; font-weight: bold; }
     </style>
-    <!-- Librería para generar QR -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
-    <div class="tablero-container">
-        <!-- Interfaz de Visualización Central (Lo que todos ven) -->
-        <div id="visor">
-            <div class="tablero">
-                <div class="equipo">
-                    <div class="escudo" id="colorA">A</div>
-                    <span id="nombreA">Seleccione Equipo</span>
-                </div>
-                <div style="text-align: center;">
-                    <div><span class="marcador" id="golesA">0</span> <span style="font-size:24px; color:white;">-</span> <span class="marcador" id="golesB">0</span></div>
-                    <div class="tiempo" id="cronometro">00:00</div>
-                </div>
-                <div class="equipo" style="justify-content: flex-end;">
-                    <span id="nombreB">Evaluación (Líder)</span>
-                    <div class="escudo" id="colorB" style="background-color: #555;">L</div>
-                </div>
-            </div>
+    <!-- MENÚ DE NAVEGACIÓN -->
+    <div class="nav-tabs">
+        <button class="nav-btn active" onclick="switchTab('tab-visor')">📺 Transmisión</button>
+        <button class="nav-btn" onclick="switchTab('tab-equipos')">📝 Cargar Slide</button>
+        <button class="nav-btn" onclick="switchTab('tab-lider')">⚖️ Árbitro</button>
+    </div>
 
-            <div id="zonaPresentacion">
-                <span id="instruccionPresentacion">Esperando inicio de partido...</span>
-                <iframe id="visorIframe"></iframe>
-            </div>
-
-            <table id="tablaClasificacion">
-                <thead>
-                    <tr>
-                        <th>Pos.</th>
-                        <th>Equipo</th>
-                        <th>Goles (Favor)</th>
-                        <th>Autogoles (Contra)</th>
-                        <th>Diferencia</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Filas dinámicas -->
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Panel del Líder (Solo tú accedes) -->
-        <div id="panelLider">
-            <h3>⚙️ Panel del Líder (Árbitro)</h3>
-            
-            <!-- Acceso con Contraseña -->
-            <div id="loginLider">
-                <input type="password" id="passwordInput" placeholder="Contraseña de Líder">
-                <button id="btnAcceso">Acceder</button>
-            </div>
-
-            <!-- Controles (Ocultos inicialmente) -->
-            <div id="controlesLider" style="display: none;">
-                <div class="input-group">
-                    <label>Equipos Registrados (Alineación):</label>
-                    <select id="selectEquipoJuego">
-                        <option value="">-- No hay equipos con enlaces --</option>
-                    </select>
-                    <button id="btnEmpezarPartido">▶ Empezar Partido</button>
-                    <button id="btnTerminarPartido">⏹️ Terminar</button>
+    <!-- 1. VISTA TRANSMISIÓN (PANTALLA PRINCIPAL EN VIVO) -->
+    <div id="tab-visor" class="section-view active">
+        <div class="scoreboard">
+            <div class="match-header">EVALUACIÓN DE DESEMPEÑO - EN VIVO</div>
+            <div class="teams-container">
+                <div class="team-box">
+                    <div class="team-badge" id="v-badgeA" style="background:#64748b;">?</div>
+                    <div class="team-name" id="v-nombreA">Sin Equipo</div>
                 </div>
-
-                <div class="input-group">
-                    <label>Acciones de Calificación en Vivo:</label>
-                    <button class="btn-gol" id="btnGolA">⚽ ¡Gol para el Equipo!</button>
-                    <button class="btn-autogol" id="btnAutoGolA">⚠️ Autogol (Punto en Contra)</button>
+                <div class="score-box">
+                    <div class="score-numbers"><span id="v-goles">0</span> - <span id="v-autogoles">0</span></div>
+                    <div class="match-time" id="v-timer">00:00</div>
                 </div>
-                
-                <div class="input-group">
-                    <button id="btnMostrarRegistro">📢 Mostrar QR para Registro de Equipos</button>
+                <div class="team-box away">
+                    <div class="team-name">Líder</div>
+                    <div class="team-badge" style="background:#334155;">L</div>
                 </div>
             </div>
         </div>
 
-        <!-- Zona de Registro (Para que los equipos peguen su enlace) -->
-        <div id="zonaRegistro">
-            <h3>📝 Registro de Enlace de Presentación</h3>
-            <p>Escanea el QR o usa el enlace para registrar el trabajo de tu equipo.</p>
+        <!-- SLIDE DE LA PRESENTACIÓN EN VIVO -->
+        <div class="slide-card" id="v-slideCard">
+            <div>
+                <div class="slide-title" id="v-actividad">Nombre de la Actividad</div>
+                <div class="slide-subtitle" id="v-mejora">Descripción breve de la mejora o propuesta realizada por el equipo.</div>
+            </div>
             
-            <div class="input-group">
-                <select id="selectEquipoRegistro">
-                    <option value="">-- Selecciona tu Equipo --</option>
-                    <!-- Opciones dinámicas -->
+            <div class="evidences-grid">
+                <div class="evidence-box before">
+                    <h5>Antes (Escenario Anterior)</h5>
+                    <img id="v-imgAntes" class="evidence-img" src="" alt="Sin evidencia previo" style="display:none;">
+                    <div id="v-phAntes" class="evidence-img">Sin imagen</div>
+                </div>
+                <div class="evidence-box after">
+                    <h5>Ahora (Mejora Aplicada)</h5>
+                    <img id="v-imgAhora" class="evidence-img" src="" alt="Sin evidencia mejora" style="display:none;">
+                    <div id="v-phAhora" class="evidence-img">Sin imagen</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABLA DE POSICIONES -->
+        <table class="standings-table">
+            <thead>
+                <tr>
+                    <th>Pos</th>
+                    <th style="text-align:left;">Equipo</th>
+                    <th>Goles</th>
+                    <th>Autogoles</th>
+                    <th>Pts</th>
+                </tr>
+            </thead>
+            <tbody id="v-tablaCuerpo"></tbody>
+        </table>
+    </div>
+
+    <!-- 2. VISTA CARGA DE SLIDE (USO DE LOS EQUIPOS DESDE EL MÓVIL) -->
+    <div id="tab-equipos" class="section-view">
+        <div class="slide-card" style="min-height: auto;">
+            <h3 style="margin-bottom: 12px; color:#38bdf8;">Plantilla Estándar de Exposición</h3>
+            
+            <div class="form-group">
+                <label>Selecciona tu Equipo:</label>
+                <select id="f-equipo">
+                    <option value="1">Equipo 1</option>
+                    <option value="2">Equipo 2</option>
+                    <option value="3">Equipo 3</option>
+                    <option value="4">Equipo 4</option>
+                    <option value="5">Equipo 5</option>
                 </select>
             </div>
-            <div class="input-group">
-                <input type="text" id="urlPresentacion" placeholder="Pega el ENLACE PÚBLICO de tu presentación">
-            </div>
-            <button id="btnRegistrarEnlace">Registrar Enlace</button>
-            <button id="btnVolverVisor" style="background-color: #555; margin-top: 10px;">Volver al Tablero Principal</button>
 
-            <div id="qrcode"></div>
+            <div class="form-group">
+                <label>Nombre de la Actividad:</label>
+                <input type="text" id="f-actividad" placeholder="Ej: Optimización de tiempos en archivo">
+            </div>
+
+            <div class="form-group">
+                <label>¿Cuál es la mejora implementada?</label>
+                <textarea id="f-mejora" placeholder="Resumen claro de lo que lograron..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Foto Escenario ANTES:</label>
+                <input type="file" id="f-fileAntes" accept="image/*">
+            </div>
+
+            <div class="form-group">
+                <label>Foto Escenario AHORA (Evidencia):</label>
+                <input type="file" id="f-fileAhora" accept="image/*">
+            </div>
+
+            <div class="form-group">
+                <label>Personalización de Fondo / Estilo:</label>
+                <input type="color" id="f-colorFondo" value="#1e293b" style="height:40px; padding:2px;">
+            </div>
+
+            <button class="btn btn-blue" onclick="guardarSlideEquipo()">💾 Guardar y Preparar Exposición</button>
+        </div>
+    </div>
+
+    <!-- 3. PANEL DE ARBITRAJE (SOLO LÍDER) -->
+    <div id="tab-lider" class="section-view">
+        <div id="lider-login" class="slide-card" style="min-height:auto;">
+            <h3>Acceso de Arbitraje</h3>
+            <div class="form-group" style="margin-top:10px;">
+                <input type="password" id="lider-pass" placeholder="Contraseña de Líder">
+            </div>
+            <button class="btn btn-blue" onclick="validarLider()">Ingresar</button>
         </div>
 
+        <div id="lider-panel" class="slide-card" style="display:none; min-height:auto;">
+            <h3 style="color:var(--accent-gold);">⚙️ Controles del Árbitro</h3>
+            
+            <div class="form-group" style="margin-top:10px;">
+                <label>Seleccionar Equipo para Presentar en Vivo:</label>
+                <select id="l-selectEquipo"></select>
+            </div>
+
+            <button class="btn btn-blue" onclick="iniciarPartido()">▶ Iniciar Exposición</button>
+            <button class="btn" style="background:#475569; color:white;" onclick="finalizarPartido()">⏹️ Finalizar Exposición</button>
+
+            <hr style="border-color:#334155; margin:15px 0;">
+
+            <label>Calificación en Tiempo Real:</label>
+            <button class="btn btn-green" onclick="registrarGol()">⚽ ¡GOL! (Acierto / Criterio Cumplido)</button>
+            <button class="btn btn-red" onclick="registrarAutogol()">⚠️ AUTOGOL (Falla / Error en proceso)</button>
+        </div>
     </div>
 
     <script>
-        // --- Configuración y Datos ---
-        const equipos = [
-            { id: 1, nombre: "Equipo 1", color: "#e74c3c" },
-            { id: 2, nombre: "Equipo 2", color: "#3498db" },
-            { id: 3, nombre: "Equipo 3", color: "#2ecc71" },
-            { id: 4, nombre: "Equipo 4", color: "#f1c40f" },
-            { id: 5, nombre: "Equipo 5", color: "#9b59b6" }
+        // --- DATOS Y ESTADO DE LA APLICACIÓN ---
+        const CONTRASENA_LIDER = "1234";
+
+        let equipos = [
+            { id: "1", nombre: "Equipo 1", color: "#ef4444" },
+            { id: "2", nombre: "Equipo 2", color: "#3b82f6" },
+            { id: "3", nombre: "Equipo 3", color: "#10b981" },
+            { id: "4", nombre: "Equipo 4", color: "#f59e0b" },
+            { id: "5", nombre: "Equipo 5", color: "#8b5cf6" }
         ];
 
-        // Simulador de persistencia de datos (EN UN CASO REAL, ESTO DEBE SER UN BACKEND)
-        // Para GitHub Pages, si recargas la página, estos datos SE PIERDEN.
-        let datosEquipos = JSON.parse(localStorage.getItem('datosEquiposSport')) || {};
-        equipos.forEach(equipo => {
-            if (!datosEquipos[equipo.id]) {
-                datosEquipos[equipo.id] = { url: null, goles: 0, autogoles: 0 };
+        // Cargar datos desde el navegador o inicializar
+        let DB = JSON.parse(localStorage.getItem('DB_FUTBOL_DESEMPENIO')) || {};
+        equipos.forEach(eq => {
+            if (!DB[eq.id]) {
+                DB[eq.id] = {
+                    actividad: "Esperando presentación...",
+                    mejora: "El equipo aún no ha cargado los detalles de su actividad.",
+                    imgAntes: "", imgAhora: "",
+                    bg: "#1e293b",
+                    goles: 0, autogoles: 0
+                };
             }
         });
 
-        let partidoActivo = { equipoId: null, goles: 0, autogoles: 0, tiempoInicio: null };
-        let intervaloTiempo = null;
-        const contrasenaMaestra = "1234"; // ¡Cambia esto por tu contraseña segura!
+        let partidoActivo = {
+            equipoId: null,
+            goles: 0,
+            autogoles: 0,
+            timer: null,
+            segundos: 0
+        };
 
-        // --- Elementos del DOM ---
-        // Visor
-        const nombreA = document.getElementById('nombreA');
-        const golesA = document.getElementById('golesA');
-        const golesB = document.getElementById('golesB');
-        const colorA = document.getElementById('colorA');
-        const cronometro = document.getElementById('cronometro');
-        const visorIframe = document.getElementById('visorIframe');
-        const instruccionPresentacion = document.getElementById('instruccionPresentacion');
-        const tablaClasificacionBody = document.querySelector('#tablaClasificacion tbody');
-
-        // Panel Líder
-        const panelLider = document.getElementById('panelLider');
-        const loginLider = document.getElementById('loginLider');
-        const controlesLider = document.getElementById('controlesLider');
-        const passwordInput = document.getElementById('passwordInput');
-        const selectEquipoJuego = document.getElementById('selectEquipoJuego');
-
-        // Zona Registro
-        const zonaRegistro = document.getElementById('zonaRegistro');
-        const visor = document.getElementById('visor');
-        const selectEquipoRegistro = document.getElementById('selectEquipoRegistro');
-        const urlPresentacion = document.getElementById('urlPresentacion');
-        const qrContainer = document.getElementById('qrcode');
-
-        // --- Funciones de Inicialización y Persistencia ---
-        function guardarDatos() {
-            localStorage.setItem('datosEquiposSport', JSON.stringify(datosEquipos));
-        }
-
-        function cargarEquiposEnSelects() {
-            selectEquipoRegistro.innerHTML = '<option value="">-- Selecciona tu Equipo --</option>';
-            equipos.forEach(equipo => {
-                const option = document.createElement('option');
-                option.value = equipo.id;
-                option.textContent = equipo.nombre;
-                selectEquipoRegistro.appendChild(option);
-            });
-            actualizarSelectJuego();
-        }
-
-        function actualizarSelectJuego() {
-            selectEquipoJuego.innerHTML = '<option value="">-- No hay equipos con enlaces --</option>';
-            let hayEquipos = false;
-            equipos.forEach(equipo => {
-                if (datosEquipos[equipo.id].url) {
-                    const option = document.createElement('option');
-                    option.value = equipo.id;
-                    option.textContent = equipo.nombre;
-                    selectEquipoJuego.appendChild(option);
-                    hayEquipos = true;
-                }
-            });
-            if (hayEquipos && selectEquipoJuego.options[0].value === "") {
-                 selectEquipoJuego.remove(0); // Quitar la opción por defecto si hay equipos
-            }
-        }
-
-        // --- Funciones del Visor y Tabla ---
-        function actualizarVisor() {
-            if (partidoActivo.equipoId) {
-                const equipo = equipos.find(e => e.id == partidoActivo.equipoId);
-                nombreA.textContent = equipo.nombre;
-                colorA.style.backgroundColor = equipo.color;
-                colorA.textContent = equipo.nombre.charAt(0);
-                golesA.textContent = partidoActivo.goles;
-                golesB.textContent = partidoActivo.autogoles;
-
-                instruccionPresentacion.style.display = 'none';
-                visorIframe.style.display = 'block';
-                // Intentar cargar la URL en el iframe. Nota: Muchos sitios bloquean iframes (Google Drive/Slides, etc.)
-                // Si bloquea, el líder debe hacer clic en "Abrir en nueva pestaña" (se puede añadir un botón)
-                visorIframe.src = datosEquipos[partidoActivo.equipoId].url;
-
-            } else {
-                nombreA.textContent = "Seleccione Equipo";
-                colorA.style.backgroundColor = "#ccc";
-                colorA.textContent = "A";
-                golesA.textContent = 0;
-                golesB.textContent = 0;
-                cronometro.textContent = "00:00";
-                instruccionPresentacion.style.display = 'block';
-                visorIframe.style.display = 'none';
-                visorIframe.src = "";
-            }
-        }
-
-        function actualizarTiempo() {
-            if (partidoActivo.tiempoInicio) {
-                const diferenciaMs = new Date() - partidoActivo.tiempoInicio;
-                const totalSegundos = Math.floor(diferenciaMs / 1000);
-                const minutos = String(Math.floor(totalSegundos / 60)).padStart(2, '0');
-                const segundos = String(totalSegundos % 60).padStart(2, '0');
-                cronometro.textContent = `${minutos}:${segundos}`;
-            }
-        }
-
-        function actualizarTabla() {
-            tablaClasificacionBody.innerHTML = '';
+        // --- SISTEMA DE NAVEGACIÓN ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
             
-            const listaEquipos = equipos.map(equipo => {
-                const datos = datosEquipos[equipo.id];
-                return {
-                    ...equipo,
-                    ...datos,
-                    diferencia: datos.goles - datos.autogoles
-                };
-            }).sort((a, b) => (b.goles - b.autogoles) - (a.goles - a.autogoles)); // Ordenar por diferencia
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
 
-            listaEquipos.forEach((equipo, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td><div class="escudo-tabla" style="background-color: ${equipo.color}">${equipo.nombre.charAt(0)}</div>${equipo.nombre}</td>
-                    <td>${equipo.goles}</td>
-                    <td>${equipo.autogoles}
+        // --- MANEJO DE IMÁGENES A BASE64 ---
+        function readImageAsBase64(fileInput) {
+            return new Promise((resolve) => {
+                const file = fileInput.files[0];
+                if (!file) resolve("");
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // --- GUARDA DE PLANTILLA POR PARTE DEL EQUIPO ---
+        async function guardarSlideEquipo() {
+            const id = document.getElementById('f-equipo').value;
+            const actividad = document.getElementById('f-actividad').value || "Actividad Sin Nombre";
+            const mejora = document.getElementById('f-mejora').value || "Sin descripción de mejora";
+            const bg = document.getElementById('f-colorFondo').value;
+
+            const fileAntes = document.getElementById('f-fileAntes');
+            const fileAhora = document.getElementById('f-fileAhora');
+
+            const imgAntes = await readImageAsBase64(fileAntes) || DB[id].imgAntes;
+            const imgAhora = await readImageAsBase64(fileAhora) || DB[id].imgAhora;
+
+            DB[id].actividad = actividad;
+            DB[id].mejora = mejora;
+            DB[id].bg = bg;
+            DB[id].imgAntes = imgAntes;
+            DB[id].imgAhora = imgAhora;
+
+            localStorage.setItem('DB_FUTBOL_DESEMPENIO', JSON.stringify(DB));
+            alert("✅ ¡Slide de tu equipo guardado exitosamente!");
+            actualizarOpcionesLider();
+        }
+
+        // --- RENDERIZAR EN EL VISOR PÚBLICO ---
+        function renderVisor(id) {
+            const eq = equipos.find(e => e.id === id);
+            const data = DB[id];
+
+            document.getElementById('v-badgeA').textContent = eq.nombre.charAt(0);
+            document.getElementById('v-badgeA').style.backgroundColor = eq.color;
+            document.getElementById('v-nombreA').textContent = eq.nombre;
+
+            document.getElementById('v-actividad').textContent = data.actividad;
+            document.getElementById('v-mejora').textContent = data.mejora;
+            document.getElementById('v-slideCard').style.backgroundColor = data.bg;
+
+            // Render Imágenes
+            if (data.imgAntes) {
+                document.getElementById('v-imgAntes').src = data.imgAntes;
+                document.getElementById('v-imgAntes').style.display = 'block';
+                document.getElementById('v-phAntes').style.display = 'none';
+            } else {
+                document.getElementById('v-imgAntes').style.display = 'none';
+                document.getElementById('v-phAntes').style.display = 'flex';
+            }
+
+            if (data.imgAhora) {
+                document.getElementById('v-imgAhora').src = data.imgAhora;
+                document.getElementById('v-imgAhora').style.display = 'block';
+                document.getElementById('v-phAhora').style.display = 'none';
+            } else {
+                document.getElementById('v-imgAhora').style.display = 'none';
+                document.getElementById('v-phAhora').style.display = 'flex';
+            }
+        }
+
+        function renderTabla() {
+            const tbody = document.getElementById('v-tablaCuerpo');
+            tbody.innerHTML = "";
+
+            let ranking = equipos.map(e => ({
+                ...e,
+                ...DB[e.id],
+                pts: (DB[e.id].goles * 3) - DB[e.id].autogoles
+            })).sort((a, b) => b.pts - a.pts);
+
+            ranking.forEach((eq, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${idx + 1}</td>
+                    <td class="team-cell"><span style="width:12px; height:12px; border-radius:50%; background:${eq.color}; display:inline-block;"></span> ${eq.nombre}</td>
+                    <td>${eq.goles}</td>
+                    <td>${eq.autogoles}</td>
+                    <td><strong>${eq.pts}</strong></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- LÓGICA DE ÁRBITRO / LÍDER ---
+        function validarLider() {
+            const pass = document.getElementById('lider-pass').value;
+            if (pass === CONTRASENA_LIDER) {
+                document.getElementById('lider-login').style.display = 'none';
+                document.getElementById('lider-panel').style.display = 'block';
+                actualizarOpcionesLider();
+            } else {
+                alert("Contraseña incorrecta. Pista por defecto: 1234");
+            }
+        }
+
+        function actualizarOpcionesLider() {
+            const sel = document.getElementById('l-selectEquipo');
+            sel.innerHTML = "";
+            equipos.forEach(eq => {
+                const opt = document.createElement('option');
+                opt.value = eq.id;
+                opt.textContent = `${eq.nombre} - ${DB[eq.id].actividad.substring(0, 20)}...`;
+                sel.appendChild(opt);
+            });
+        }
+
+        function iniciarPartido() {
+            const id = document.getElementById('l-selectEquipo').value;
+            partidoActivo.equipoId = id;
+            partidoActivo.goles = 0;
+            partidoActivo.autogoles = 0;
+            partidoActivo.segundos = 0;
+
+            document.getElementById('v-goles').textContent = "0";
+            document.getElementById('v-autogoles').textContent = "0";
+
+            renderVisor(id);
+
+            clearInterval(partidoActivo.timer);
+            partidoActivo.timer = setInterval(() => {
+                partidoActivo.segundos++;
+                let m = String(Math.floor(partidoActivo.segundos / 60)).padStart(2, '0');
+                let s = String(partidoActivo.segundos % 60).padStart(2, '0');
+                document.getElementById('v-timer').textContent = `${m}:${s}`;
+            }, 1000);
+
+            switchTab('tab-visor');
+        }
+
+        function registrarGol() {
+            if (!partidoActivo.equipoId) return alert("Inicia una exposición primero.");
+            partidoActivo.goles++;
+            document.getElementById('v-goles').textContent = partidoActivo.goles;
+        }
+
+        function registrarAutogol() {
+            if (!partidoActivo.equipoId) return alert("Inicia una exposición primero.");
+            partidoActivo.autogoles++;
+            document.getElementById('v-autogoles').textContent = partidoActivo.autogoles;
+        }
+
+        function finalizarPartido() {
+            if (!partidoActivo.equipoId) return;
+            clearInterval(partidoActivo.timer);
+
+            const id = partidoActivo.equipoId;
+            DB[id].goles += partidoActivo.goles;
+            DB[id].autogoles += partidoActivo.autogoles;
+
+            localStorage.setItem('DB_FUTBOL_DESEMPENIO', JSON.stringify(DB));
+            renderTabla();
+            alert(`🏁 Exposición Finalizada.\nResultado acumulado para ${equipos.find(e => e.id === id).nombre} guardado.`);
+            partidoActivo.equipoId = null;
+        }
+
+        // Carga inicial
+        renderTabla();
+    </script>
+</body>
+</html>
