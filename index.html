@@ -3,410 +3,413 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TRANSMISION EN VIVO - LIGA DE DESEMPEÑO</title>
+    <title>TRANSMISION LIGA DE DESEMPEÑO</title>
     <style>
         :root {
+            --win-blue: #0f1d38;
             --win-orange: #ff5500;
-            --win-dark: #121212;
-            --win-panel: #1a1a1a;
-            --win-card: #242424;
-            --win-text: #ffffff;
-            --win-gray: #aaaaaa;
-            --win-green: #00c853;
-            --win-red: #d50000;
-            --win-blue: #0091ea;
+            --win-bg: #f4f6f9;
+            --win-card: #ffffff;
+            --win-text: #1a1a1a;
+            --win-gray: #e2e8f0;
+            --win-dark-gray: #64748b;
+            --win-green: #10b981;
+            --win-red: #ef4444;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Arial Black', 'Impact', sans-serif; }
-        body { background-color: var(--win-dark); color: var(--win-text); overflow-x: hidden; min-height: 100vh; }
+        body { background-color: var(--win-bg); color: var(--win-text); min-height: 100vh; padding-bottom: 60px; }
 
-        /* --- CONTENEDOR PRINCIPAL TIPO CONSOLA PSP --- */
-        .psp-container {
-            display: grid;
-            grid-template-columns: 1fr 320px;
-            height: 100vh;
-            width: 100vw;
-        }
-
-        @media (max-width: 900px) {
-            .psp-container {
-                grid-template-columns: 1fr;
-                grid-template-rows: auto auto;
-                height: auto;
-            }
-        }
-
-        /* --- PANTALLA PRINCIPAL DE TRANSMISION (IZQUIERDA) --- */
-        .screen-broadcast {
-            background: #080808;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            overflow-y: auto;
-        }
-
-        /* Marcador Win Sports / ESPN */
-        .scoreboard-broadcast {
-            background: linear-gradient(90deg, #101010 0%, #1f1f1f 100%);
-            border-left: 6px solid var(--win-orange);
-            border-radius: 4px;
-            padding: 10px 15px;
+        /* HEADER DEPORTIVO CLEAR */
+        .top-bar {
+            background-color: var(--win-blue);
+            color: white;
+            padding: 10px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.8);
+            border-bottom: 4px solid var(--win-orange);
+        }
+
+        .brand-title { font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; }
+
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-mode {
+            background: #ffffff22;
+            color: white;
+            border: 1px solid #ffffff44;
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .btn-mode.active {
+            background: var(--win-orange);
+            border-color: var(--win-orange);
+            font-weight: bold;
+        }
+
+        /* VISTAS */
+        .view-container { display: none; padding: 20px; max-width: 1200px; margin: 0 auto; }
+        .view-container.active { display: block; }
+
+        /* MARCADOR DEPORTIVO EN VIVO */
+        .scoreboard {
+            background: var(--win-card);
+            border: 1px solid var(--win-gray);
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
 
         .badge-live {
             background-color: var(--win-red);
             color: white;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             padding: 2px 6px;
             border-radius: 2px;
-            letter-spacing: 1px;
             animation: blink 1s infinite;
         }
 
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-        .team-info-box { display: flex; align-items: center; gap: 10px; }
-        .team-flag { width: 32px; height: 32px; background: var(--win-orange); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; border-radius: 3px; }
-        .team-name-txt { font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .team-box { display: flex; align-items: center; gap: 10px; }
+        .team-badge { width: 36px; height: 36px; background: var(--win-blue); color: white; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 1.1rem; }
+        .score-num { font-size: 2rem; color: var(--win-orange); letter-spacing: 2px; background: #f8fafc; padding: 2px 12px; border-radius: 4px; border: 1px solid var(--win-gray); }
 
-        .score-display {
-            background: #000;
-            padding: 5px 15px;
-            border-radius: 4px;
-            border: 1px solid #333;
-            font-size: 1.8rem;
-            color: var(--win-orange);
-            letter-spacing: 3px;
-        }
-
-        .match-timer { font-size: 0.85rem; color: var(--win-gray); text-align: center; font-family: monospace; }
-
-        /* Tarjeta de Slide Deportivo */
-        .slide-frame {
+        /* SLIDE DE PRESENTACION */
+        .broadcast-slide {
             background: var(--win-card);
-            border-top: 4px solid var(--win-orange);
-            border-radius: 6px;
-            padding: 15px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            border: 1px solid var(--win-gray);
+            border-top: 5px solid var(--win-orange);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
 
-        .slide-header {
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 2px solid #333;
-            padding-bottom: 8px;
-            margin-bottom: 12px;
-        }
+        .slide-header { display: flex; justify-content: space-between; border-bottom: 2px solid var(--win-gray); padding-bottom: 10px; margin-bottom: 15px; }
+        .slide-title { color: var(--win-blue); font-size: 1.3rem; text-transform: uppercase; }
 
-        .slide-title { color: var(--win-orange); font-size: 1.2rem; text-transform: uppercase; }
-        .activity-counter { font-size: 0.8rem; background: #333; padding: 3px 8px; border-radius: 3px; }
-
-        .evidence-container {
+        .evidence-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin: 10px 0;
-        }
-
-        .evidence-card {
-            background: #151515;
-            border: 1px solid #333;
-            padding: 8px;
-            border-radius: 4px;
-            text-align: center;
-        }
-
-        .evidence-card.before { border-top: 3px solid var(--win-red); }
-        .evidence-card.after { border-top: 3px solid var(--win-green); }
-
-        .evidence-label { font-size: 0.75rem; color: var(--win-gray); text-transform: uppercase; margin-bottom: 6px; }
-        .evidence-media { width: 100%; height: 160px; object-fit: cover; background: #000; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #555; }
-
-        /* --- MANDOS DERECHOS TIPO JOYSTICK / CONSOLA (DERECHA) --- */
-        .controls-joystick {
-            background: var(--win-panel);
-            border-left: 2px solid #333;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
             gap: 15px;
-            overflow-y: auto;
+            margin: 15px 0;
         }
 
-        .joystick-title {
-            font-size: 0.9rem;
-            color: var(--win-orange);
-            text-transform: uppercase;
-            border-bottom: 1px solid #333;
-            padding-bottom: 5px;
-            text-align: center;
-        }
-
-        /* Pad Controles de Mando */
-        .d-pad {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 5px;
-            background: #111;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #333;
-        }
-
-        .btn-ctrl {
-            background: #2a2a2a;
-            color: white;
-            border: 1px solid #444;
-            padding: 12px 5px;
-            font-size: 0.75rem;
-            border-radius: 4px;
-            cursor: pointer;
-            text-align: center;
-            text-transform: uppercase;
-        }
-
-        .btn-ctrl:active { background: var(--win-orange); }
-        .btn-gol { background: var(--win-green); color: black; font-weight: bold; }
-        .btn-autogol { background: var(--win-red); color: white; font-weight: bold; }
-
-        /* Formulario Carga Equipos */
-        .form-section {
-            background: #181818;
+        .evidence-box {
+            background: #f8fafc;
+            border: 1px solid var(--win-gray);
             padding: 10px;
             border-radius: 6px;
-            border: 1px solid #282828;
+            text-align: center;
         }
 
-        .form-group { margin-bottom: 8px; }
-        .form-group label { display: block; font-size: 0.7rem; color: var(--win-gray); text-transform: uppercase; margin-bottom: 3px; }
+        .evidence-box.before { border-top: 3px solid var(--win-red); }
+        .evidence-box.after { border-top: 3px solid var(--win-green); }
+
+        .evidence-label { font-size: 0.75rem; color: var(--win-dark-gray); text-transform: uppercase; margin-bottom: 8px; }
+        .evidence-img { width: 100%; height: 220px; object-fit: cover; border-radius: 4px; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: var(--win-dark-gray); }
+
+        /* FORMULARIO DE EQUIPOS */
+        .form-card {
+            background: var(--win-card);
+            border: 1px solid var(--win-gray);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 0.75rem; color: var(--win-dark-gray); text-transform: uppercase; margin-bottom: 4px; }
         .form-group input, .form-group select, .form-group textarea {
             width: 100%;
-            background: #0a0a0a;
-            border: 1px solid #333;
-            color: white;
-            padding: 6px;
-            font-size: 0.8rem;
-            border-radius: 3px;
+            padding: 8px;
+            border: 1px solid var(--win-gray);
+            border-radius: 4px;
             font-family: sans-serif;
+            font-size: 0.85rem;
         }
 
-        /* Tabla Clasificación */
-        .standings-mini {
+        .btn-submit {
+            width: 100%;
+            background: var(--win-blue);
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        /* CONTROLES FLOTANTES TIPO JOYSTICK PSP */
+        .psp-overlay-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 999;
+            background: rgba(15, 29, 56, 0.85);
+            backdrop-filter: blur(5px);
+            padding: 12px;
+            border-radius: 50px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .d-pad-circle {
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .d-pad-btn {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-transform: uppercase;
+        }
+
+        .d-pad-btn:active { background: var(--win-orange); }
+        .d-pad-up { top: 4px; left: 36px; }
+        .d-pad-down { bottom: 4px; left: 36px; }
+        .d-pad-left { top: 36px; left: 4px; }
+        .d-pad-right { top: 36px; right: 4px; }
+
+        .action-btns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .btn-psp {
+            background: var(--win-orange);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            font-size: 0.7rem;
+            border-radius: 20px;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .btn-psp.gol { background: var(--win-green); }
+        .btn-psp.autogol { background: var(--win-red); }
+
+        /* TABLA DE POSICIONES */
+        .table-sports {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.75rem;
-            margin-top: 10px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--win-gray);
         }
-        .standings-mini th, .standings-mini td { padding: 6px; text-align: center; border-bottom: 1px solid #222; }
-        .standings-mini th { background: #000; color: var(--win-orange); }
+        .table-sports th, .table-sports td { padding: 10px; text-align: center; border-bottom: 1px solid var(--win-gray); }
+        .table-sports th { background: var(--win-blue); color: white; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
-    <div class="psp-container">
+    <!-- BARRA SUPERIOR -->
+    <div class="top-bar">
+        <div class="brand-title">TRANSMISION LIGA DE DESEMPEÑO</div>
+        <div class="mode-selector">
+            <button class="btn-mode active" id="mode-btn-lider" onclick="cambiarVista('lider')">MODO LIDER (TRANSMISION)</button>
+            <button class="btn-mode" id="mode-btn-equipo" onclick="cambiarVista('equipo')">MODO EQUIPO (REGISTRO)</button>
+        </div>
+    </div>
 
-        <!-- IZQUIERDA: PANTALLA PRINCIPAL DE TRANSMISION -->
-        <div class="screen-broadcast">
-            
-            <div class="scoreboard-broadcast">
-                <div class="team-info-box">
-                    <div class="team-flag" id="b-flag">A</div>
-                    <div>
-                        <div class="team-name-txt" id="b-teamName">SELECCIONE EQUIPO</div>
-                        <span class="badge-live">EN VIVO</span>
-                    </div>
-                </div>
-
-                <div style="text-align: center;">
-                    <div class="score-display"><span id="b-goles">0</span> - <span id="b-autogoles">0</span></div>
-                    <div class="match-timer" id="b-timer">00:00</div>
-                </div>
-
-                <div class="team-info-box">
-                    <div style="text-align: right;">
-                        <div class="team-name-txt">EVALUACION</div>
-                        <span style="font-size:0.65rem; color:var(--win-gray);">PANEL LIDER</span>
-                    </div>
-                    <div class="team-flag" style="background:#333;">L</div>
-                </div>
-            </div>
-
-            <!-- SLIDE / PRESENTACION ACTIVA -->
-            <div class="slide-frame" id="b-slideFrame">
+    <!-- VISTA 1: MODO LIDER / TRANSMISION EN VIVO -->
+    <div id="vista-lider" class="view-container active">
+        
+        <div class="scoreboard">
+            <div class="team-box">
+                <div class="team-badge" id="b-flag">E1</div>
                 <div>
-                    <div class="slide-header">
-                        <div class="slide-title" id="b-activityTitle">ACTIVIDAD EN CURSO</div>
-                        <div class="activity-counter" id="b-activityIndex">ACTIVIDAD 0 / 0</div>
-                    </div>
-                    <p id="b-activityDesc" style="font-family: sans-serif; font-size: 0.9rem; color: #ccc; margin-bottom: 10px;">
-                        Seleccione un equipo y monte la presentación en vivo usando el panel de control lateral.
-                    </p>
-                </div>
-
-                <div class="evidence-container">
-                    <div class="evidence-card before">
-                        <div class="evidence-label">ESCENARIO ANTERIOR</div>
-                        <img id="b-imgBefore" class="evidence-media" src="" style="display:none;">
-                        <div id="b-phBefore" class="evidence-media">SIN EVIDENCIA</div>
-                    </div>
-                    <div class="evidence-card after">
-                        <div class="evidence-label">MEJORA APLICADA</div>
-                        <img id="b-imgAfter" class="evidence-media" src="" style="display:none;">
-                        <div id="b-phAfter" class="evidence-media">SIN EVIDENCIA</div>
-                    </div>
-                </div>
-
-                <!-- NAVEGADOR DE ACTIVIDADES TIPO CARROUSEL -->
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
-                    <button class="btn-ctrl" onclick="navActividad(-1)">ANTERIOR</button>
-                    <span id="b-colorIndicator" style="font-size:0.7rem; color:var(--win-gray);">COLOR ESTILO ACTIVADO</span>
-                    <button class="btn-ctrl" onclick="navActividad(1)">SIGUIENTE</button>
+                    <div style="font-size: 1.1rem;" id="b-teamName">EQUIPO 1</div>
+                    <span class="badge-live">EN VIVO</span>
                 </div>
             </div>
 
-            <!-- TABLA GENERAL DE POSICIONES -->
-            <table class="standings-mini">
-                <thead>
-                    <tr>
-                        <th>POS</th>
-                        <th style="text-align:left;">EQUIPO</th>
-                        <th>GOLES</th>
-                        <th>AUTOGOLES</th>
-                        <th>PTS</th>
-                    </tr>
-                </thead>
-                <tbody id="b-standingsBody"></tbody>
-            </table>
+            <div style="text-align: center;">
+                <div class="score-num"><span id="b-goles">0</span> - <span id="b-autogoles">0</span></div>
+                <div style="font-size: 0.75rem; color: var(--win-dark-gray); margin-top: 4px;" id="b-timer">00:00</div>
+            </div>
 
+            <div class="team-box">
+                <div style="text-align: right;">
+                    <div style="font-size: 1.1rem;">EVALUACION</div>
+                    <span style="font-size: 0.65rem; color: var(--win-dark-gray);">PANEL JUEZ</span>
+                </div>
+                <div class="team-badge" style="background: var(--win-dark-gray);">J</div>
+            </div>
         </div>
 
-        <!-- DERECHA: CONTROLES JOYSTICK / PANEL DEL LIDER -->
-        <div class="controls-joystick">
-            
-            <div class="joystick-title">CONTROLES DE ARBITRAJE</div>
-
-            <!-- Mando Estilo Joystick (D-PAD) -->
-            <div class="d-pad">
-                <div></div>
-                <button class="btn-ctrl btn-gol" onclick="modificarMarcador('gol')">+ GOL</button>
-                <div></div>
-                <button class="btn-ctrl" onclick="navActividad(-1)">&lt; SLIDE</button>
-                <button class="btn-ctrl" id="btn-power" onclick="togglePartido()" style="background:var(--win-orange);">START</button>
-                <button class="btn-ctrl" onclick="navActividad(1)">SLIDE &gt;</button>
-                <div></div>
-                <button class="btn-ctrl btn-autogol" onclick="modificarMarcador('autogol')">+ AUTOGOL</button>
-                <div></div>
+        <div class="broadcast-slide" id="b-slideFrame">
+            <div class="slide-header">
+                <div class="slide-title" id="b-activityTitle">SELECCIONE ACTIVIDAD</div>
+                <div style="font-size: 0.8rem; background: var(--win-gray); padding: 4px 8px; border-radius: 4px;" id="b-activityIndex">ACTIVIDAD 0 / 0</div>
             </div>
 
-            <!-- Montar Presentación a la Transmisión -->
-            <div class="form-section">
-                <div class="joystick-title" style="border:none; margin-bottom:5px;">TRANSMISION EN VIVO</div>
-                <div class="form-group">
-                    <label>EQUIPO EN CANCHA:</label>
-                    <select id="ctrl-selectEquipo" onchange="cargarEquipoATransmision()"></select>
+            <p id="b-activityDesc" style="font-family: sans-serif; font-size: 0.9rem; color: #475569; margin-bottom: 15px;">
+                Cargue actividades desde la pestaña Modo Equipo o alterne entre los equipos registrados.
+            </p>
+
+            <div class="evidence-grid">
+                <div class="evidence-box before">
+                    <div class="evidence-label">ESCENARIO ANTERIOR</div>
+                    <img id="b-imgBefore" class="evidence-img" src="" style="display:none;">
+                    <div id="b-phBefore" class="evidence-img">SIN EVIDENCIA</div>
+                </div>
+                <div class="evidence-box after">
+                    <div class="evidence-label">MEJORA APLICADA</div>
+                    <img id="b-imgAfter" class="evidence-img" src="" style="display:none;">
+                    <div id="b-phAfter" class="evidence-img">SIN EVIDENCIA</div>
                 </div>
             </div>
-
-            <!-- Carga de Múltiples Actividades por el Equipo -->
-            <div class="form-section">
-                <div class="joystick-title" style="border:none; margin-bottom:5px;">REGISTRO DE ACTIVIDADES</div>
-                
-                <div class="form-group">
-                    <label>SELECCIONAR MI EQUIPO:</label>
-                    <select id="reg-equipo">
-                        <option value="1">EQUIPO 1</option>
-                        <option value="2">EQUIPO 2</option>
-                        <option value="3">EQUIPO 3</option>
-                        <option value="4">EQUIPO 4</option>
-                        <option value="5">EQUIPO 5</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>NOMBRE DE LA ACTIVIDAD:</label>
-                    <input type="text" id="reg-titulo" placeholder="EJ: OPTIMIZACION DE PROCESO">
-                </div>
-
-                <div class="form-group">
-                    <label>DESCRIPCION DE MEJORA:</label>
-                    <textarea id="reg-desc" rows="2" placeholder="DETALLES DE LA MEJORA..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>EVIDENCIA ANTES (IMAGEN):</label>
-                    <input type="file" id="reg-fileBefore" accept="image/*">
-                </div>
-
-                <div class="form-group">
-                    <label>EVIDENCIA AHORA (IMAGEN):</label>
-                    <input type="file" id="reg-fileAfter" accept="image/*">
-                </div>
-
-                <div class="form-group">
-                    <label>COLOR DE FONDO TARJETA:</label>
-                    <input type="color" id="reg-color" value="#242424" style="height:30px;">
-                </div>
-
-                <button class="btn-ctrl" style="width:100%; background:var(--win-blue);" onclick="agregarActividadEquipo()">+ REGISTRAR ACTIVIDAD</button>
-            </div>
-
         </div>
+
+        <!-- TABLA GENERAL -->
+        <table class="table-sports">
+            <thead>
+                <tr>
+                    <th>POS</th>
+                    <th style="text-align: left;">EQUIPO</th>
+                    <th>GOLES</th>
+                    <th>AUTOGOLES</th>
+                    <th>PUNTOS</th>
+                </tr>
+            </thead>
+            <tbody id="b-standingsBody"></tbody>
+        </table>
 
     </div>
 
+    <!-- VISTA 2: MODO EQUIPO / REGISTRO DE GOLES Y ACTIVIDADES -->
+    <div id="vista-equipo" class="view-container">
+        <div class="form-card">
+            <div class="slide-title" style="margin-bottom: 15px;">REGISTRO DE ACTIVIDADES Y GOLES</div>
+
+            <div class="form-group">
+                <label>SELECCIONAR EQUIPO:</label>
+                <select id="reg-equipo">
+                    <option value="1">EQUIPO 1</option>
+                    <option value="2">EQUIPO 2</option>
+                    <option value="3">EQUIPO 3</option>
+                    <option value="4">EQUIPO 4</option>
+                    <option value="5">EQUIPO 5</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>NOMBRE DE LA ACTIVIDAD (GOL PROUESTO):</label>
+                <input type="text" id="reg-titulo" placeholder="EJ: AUTOMATIZACION DE INFORMES">
+            </div>
+
+            <div class="form-group">
+                <label>DESCRIPCION DEL LOGRO:</label>
+                <textarea id="reg-desc" rows="3" placeholder="EXPLICA EL IMPACTO DE LA ACTIVIDAD..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>EVIDENCIA ANTES (IMAGEN):</label>
+                <input type="file" id="reg-fileBefore" accept="image/*">
+            </div>
+
+            <div class="form-group">
+                <label>EVIDENCIA DESPUES (IMAGEN):</label>
+                <input type="file" id="reg-fileAfter" accept="image/*">
+            </div>
+
+            <button class="btn-submit" onclick="agregarActividadEquipo()">REGISTRAR ACTIVIDAD</button>
+        </div>
+    </div>
+
+    <!-- JOYSTICK / MANDO PSP FLOTANTE (SOLO VISIBLE EN MODO LIDER) -->
+    <div class="psp-overlay-controls" id="psp-controls">
+        <div class="d-pad-circle">
+            <button class="d-pad-btn d-pad-up" onclick="modificarMarcador('gol')">GOL</button>
+            <button class="d-pad-btn d-pad-down" onclick="modificarMarcador('autogol')">AUTO</button>
+            <button class="d-pad-btn d-pad-left" onclick="navActividad(-1)">&lt;</button>
+            <button class="d-pad-btn d-pad-right" onclick="navActividad(1)">&gt;</button>
+        </div>
+
+        <div class="action-btns">
+            <button class="btn-psp gol" onclick="modificarMarcador('gol')">+ GOL</button>
+            <button class="btn-psp autogol" onclick="modificarMarcador('autogol')">+ AUTOGOL</button>
+            <button class="btn-psp" onclick="cambiarEquipoTransmision(-1)">&lt; EQ</button>
+            <button class="btn-psp" onclick="cambiarEquipoTransmision(1)">EQ &gt;</button>
+        </div>
+    </div>
+
     <script>
-        // CONFIGURACION DE EQUIPOS
         const equiposBase = [
             { id: "1", nombre: "EQUIPO 1", color: "#ff5500" },
             { id: "2", nombre: "EQUIPO 2", color: "#0091ea" },
             { id: "3", nombre: "EQUIPO 3", color: "#00c853" },
-            { id: "4", nombre: "EQUIPO 4", color: "#ffd600" },
-            { id: "5", nombre: "EQUIPO 5", color: "#aa00ff" }
+            { id: "4", nombre: "EQUIPO 4", color: "#f59e0b" },
+            { id: "5", nombre: "EQUIPO 5", color: "#8b5cf6" }
         ];
 
-        // BASE DE DATOS EN LOCALSTORAGE
-        let DB = JSON.parse(localStorage.getItem('WIN_SPORTS_DB')) || {};
+        let DB = JSON.parse(localStorage.getItem('WIN_SPORTS_CLEAR_DB')) || {};
         equiposBase.forEach(eq => {
             if (!DB[eq.id]) {
-                DB[eq.id] = {
-                    actividades: [],
-                    goles: 0,
-                    autogoles: 0
-                };
+                DB[eq.id] = { actividades: [], goles: 0, autogoles: 0 };
             }
         });
 
         let partido = {
-            equipoId: "1",
-            actividadIndex: 0,
-            activo: false,
-            timer: null,
-            segundos: 0
+            equipoIndex: 0,
+            actividadIndex: 0
         };
 
         function init() {
-            poblularSelects();
             renderTablaPosiciones();
             cargarEquipoATransmision();
         }
 
-        function poblularSelects() {
-            const selCtrl = document.getElementById('ctrl-selectEquipo');
-            selCtrl.innerHTML = "";
-            equiposBase.forEach(eq => {
-                const opt = document.createElement('option');
-                opt.value = eq.id;
-                opt.textContent = `${eq.nombre} (${DB[eq.id].actividades.length} ACT)`;
-                selCtrl.appendChild(opt);
-            });
+        function cambiarVista(vista) {
+            document.getElementById('vista-lider').classList.remove('active');
+            document.getElementById('vista-equipo').classList.remove('active');
+            document.getElementById('mode-btn-lider').classList.remove('active');
+            document.getElementById('mode-btn-equipo').classList.remove('active');
+
+            if (vista === 'lider') {
+                document.getElementById('vista-lider').classList.add('active');
+                document.getElementById('mode-btn-lider').classList.add('active');
+                document.getElementById('psp-controls').style.display = 'flex';
+            } else {
+                document.getElementById('vista-equipo').classList.add('active');
+                document.getElementById('mode-btn-equipo').classList.add('active');
+                document.getElementById('psp-controls').style.display = 'none';
+            }
         }
 
         function leerImagenBase64(input) {
@@ -421,9 +424,8 @@
 
         async function agregarActividadEquipo() {
             const eqId = document.getElementById('reg-equipo').value;
-            const titulo = document.getElementById('reg-titulo').value || "ACTIVIDAD SIN TITULO";
+            const titulo = document.getElementById('reg-titulo').value || "ACTIVIDAD REGISTRADA";
             const desc = document.getElementById('reg-desc').value || "SIN DESCRIPCION";
-            const color = document.getElementById('reg-color').value;
 
             const imgBefore = await leerImagenBase64(document.getElementById('reg-fileBefore'));
             const imgAfter = await leerImagenBase64(document.getElementById('reg-fileAfter'));
@@ -431,39 +433,45 @@
             DB[eqId].actividades.push({
                 titulo: titulo,
                 desc: desc,
-                color: color,
                 imgBefore: imgBefore,
                 imgAfter: imgAfter
             });
 
-            localStorage.setItem('WIN_SPORTS_DB', JSON.stringify(DB));
-            alert("ACTIVIDAD REGISTRADA PARA EL EQUIPO");
-            poblularSelects();
-            if (partido.equipoId === eqId) {
-                renderSlideActivo();
-            }
+            localStorage.setItem('WIN_SPORTS_CLEAR_DB', JSON.stringify(DB));
+            alert("ACTIVIDAD REGISTRADA CON EXITO");
+
+            document.getElementById('reg-titulo').value = '';
+            document.getElementById('reg-desc').value = '';
+
+            cargarEquipoATransmision();
+        }
+
+        function cambiarEquipoTransmision(dir) {
+            partido.equipoIndex = (partido.equipoIndex + dir + equiposBase.length) % equiposBase.length;
+            partido.actividadIndex = 0;
+            cargarEquipoATransmision();
         }
 
         function cargarEquipoATransmision() {
-            partido.equipoId = document.getElementById('ctrl-selectEquipo').value;
-            partido.actividadIndex = 0;
-            const eq = equiposBase.find(e => e.id === partido.equipoId);
+            const eq = equiposBase[partido.equipoIndex];
 
             document.getElementById('b-teamName').textContent = eq.nombre;
-            document.getElementById('b-flag').textContent = eq.nombre.charAt(0);
+            document.getElementById('b-flag').textContent = eq.id;
             document.getElementById('b-flag').style.background = eq.color;
-            document.getElementById('b-goles').textContent = DB[partido.equipoId].goles;
-            document.getElementById('b-autogoles').textContent = DB[partido.equipoId].autogoles;
+            document.getElementById('b-goles').textContent = DB[eq.id].goles;
+            document.getElementById('b-autogoles').textContent = DB[eq.id].autogoles;
 
             renderSlideActivo();
         }
 
         function renderSlideActivo() {
-            const actividades = DB[partido.equipoId].actividades;
+            const eq = equiposBase[partido.equipoIndex];
+            const actividades = DB[eq.id].actividades;
+
             if (actividades.length === 0) {
                 document.getElementById('b-activityTitle').textContent = "SIN ACTIVIDADES";
                 document.getElementById('b-activityIndex').textContent = "ACTIVIDAD 0 / 0";
-                document.getElementById('b-activityDesc').textContent = "Este equipo no ha cargado actividades.";
+                document.getElementById('b-activityDesc').textContent = "El equipo no ha registrado actividades.";
                 document.getElementById('b-imgBefore').style.display = 'none';
                 document.getElementById('b-phBefore').style.display = 'flex';
                 document.getElementById('b-imgAfter').style.display = 'none';
@@ -475,9 +483,7 @@
             document.getElementById('b-activityTitle').textContent = act.titulo;
             document.getElementById('b-activityIndex').textContent = `ACTIVIDAD ${partido.actividadIndex + 1} / ${actividades.length}`;
             document.getElementById('b-activityDesc').textContent = act.desc;
-            document.getElementById('b-slideFrame').style.backgroundColor = act.color;
 
-            // Render imagenes
             if (act.imgBefore) {
                 document.getElementById('b-imgBefore').src = act.imgBefore;
                 document.getElementById('b-imgBefore').style.display = 'block';
@@ -498,42 +504,24 @@
         }
 
         function navActividad(dir) {
-            const total = DB[partido.equipoId].actividades.length;
+            const eq = equiposBase[partido.equipoIndex];
+            const total = DB[eq.id].actividades.length;
             if (total === 0) return;
             partido.actividadIndex = (partido.actividadIndex + dir + total) % total;
             renderSlideActivo();
         }
 
         function modificarMarcador(tipo) {
+            const eq = equiposBase[partido.equipoIndex];
             if (tipo === 'gol') {
-                DB[partido.equipoId].goles++;
+                DB[eq.id].goles++;
             } else if (tipo === 'autogol') {
-                DB[partido.equipoId].autogoles++;
+                DB[eq.id].autogoles++;
             }
-            document.getElementById('b-goles').textContent = DB[partido.equipoId].goles;
-            document.getElementById('b-autogoles').textContent = DB[partido.equipoId].autogoles;
-            localStorage.setItem('WIN_SPORTS_DB', JSON.stringify(DB));
+            document.getElementById('b-goles').textContent = DB[eq.id].goles;
+            document.getElementById('b-autogoles').textContent = DB[eq.id].autogoles;
+            localStorage.setItem('WIN_SPORTS_CLEAR_DB', JSON.stringify(DB));
             renderTablaPosiciones();
-        }
-
-        function togglePartido() {
-            const btn = document.getElementById('btn-power');
-            if (!partido.activo) {
-                partido.activo = true;
-                btn.style.background = "var(--win-green)";
-                btn.textContent = "STOP";
-                partido.timer = setInterval(() => {
-                    partido.segundos++;
-                    let m = String(Math.floor(partido.segundos / 60)).padStart(2, '0');
-                    let s = String(partido.segundos % 60).padStart(2, '0');
-                    document.getElementById('b-timer').textContent = `${m}:${s}`;
-                }, 1000);
-            } else {
-                partido.activo = false;
-                btn.style.background = "var(--win-orange)";
-                btn.textContent = "START";
-                clearInterval(partido.timer);
-            }
         }
 
         function renderTablaPosiciones() {
