@@ -70,15 +70,7 @@
             z-index: 90;
         }
 
-        .badge-live {
-            background-color: var(--win-red);
-            color: white;
-            font-size: 0.65rem;
-            padding: 2px 6px;
-            border-radius: 2px;
-            animation: blink 1s infinite;
-        }
-
+        .badge-live { background-color: var(--win-red); color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: 2px; animation: blink 1s infinite; }
         .badge-ended { background-color: var(--win-dark-gray); color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: 2px; }
 
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
@@ -99,6 +91,13 @@
             position: relative;
             overflow: hidden;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: transform 0.1s, border-color 0.2s;
+        }
+
+        .broadcast-slide.selected {
+            outline: 3px solid var(--win-orange);
+            transform: scale(1.01);
         }
 
         /* BANDERILLA / RIBBON DE EVALUACION */
@@ -133,13 +132,6 @@
         .evidence-label { font-size: 0.7rem; color: var(--win-dark-gray); text-transform: uppercase; margin-bottom: 6px; }
         .evidence-img { width: 100%; height: 180px; object-fit: cover; border-radius: 4px; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: var(--win-dark-gray); }
 
-        /* ACCIONES EVALUACION JUEZ */
-        .eval-actions { display: flex; gap: 8px; margin-top: 15px; background: #f1f5f9; padding: 8px; border-radius: 6px; }
-        .btn-eval { flex: 1; border: none; padding: 6px; font-size: 0.7rem; border-radius: 4px; cursor: pointer; text-transform: uppercase; color: white; }
-        .btn-eval.gol { background: var(--win-green); }
-        .btn-eval.autogol { background: var(--win-red); }
-        .btn-eval.neutral { background: var(--win-neutral); }
-
         /* MODO EQUIPO */
         .team-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .btn-add-activity { background: var(--win-green); color: white; border: none; padding: 8px 16px; font-size: 0.8rem; border-radius: 4px; cursor: pointer; text-transform: uppercase; }
@@ -154,7 +146,7 @@
 
         .btn-submit { width: 100%; background: var(--win-blue); color: white; border: none; padding: 12px; font-size: 0.85rem; border-radius: 4px; cursor: pointer; text-transform: uppercase; }
 
-        /* CONTROLES FLOTANTES ARBITRO */
+        /* CONTROLES MANDO ARBITRO / JOYSTICK */
         .psp-overlay-controls {
             position: fixed;
             bottom: 20px;
@@ -178,15 +170,19 @@
 
         .action-btns { display: flex; gap: 6px; }
         .btn-psp { background: var(--win-orange); color: white; border: none; padding: 8px 10px; font-size: 0.65rem; border-radius: 16px; cursor: pointer; text-transform: uppercase; }
+        .btn-psp.gol { background: var(--win-green); }
+        .btn-psp.autogol { background: var(--win-red); }
+        .btn-psp.neutral { background: var(--win-neutral); }
         .btn-psp.end-match { background: var(--win-red); font-weight: bold; }
 
         .table-sports { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; border: 1px solid var(--win-gray); }
-        .table-sports th, .table-sports td { padding: 8px 12px; text-align: center; border-bottom: 1px solid var(--win-gray); }
+        .table-sports th, .table-sports td { padding: 10px 12px; text-align: center; border-bottom: 1px solid var(--win-gray); }
         .table-sports th { background: var(--win-blue); color: white; font-size: 0.75rem; }
     </style>
 </head>
 <body>
 
+    <!-- BARRA SUPERIOR -->
     <div class="top-bar">
         <div class="brand-title">TRANSMISION LIGA DE DESEMPEÑO</div>
         <div class="mode-selector">
@@ -209,13 +205,12 @@
 
             <div style="text-align: center;">
                 <div class="score-num"><span id="b-goles">0</span> - <span id="b-autogoles">0</span></div>
-                <div style="font-size:0.65rem; color:var(--win-dark-gray); margin-top:2px;">PUNTOS: <span id="b-puntosTotal" style="color:var(--win-orange);">0</span></div>
             </div>
 
             <div class="team-box">
                 <div style="text-align: right;">
                     <div style="font-size: 1rem;">EVALUACION</div>
-                    <span style="font-size: 0.65rem; color: var(--win-dark-gray);">PANEL JUEZ</span>
+                    <span style="font-size: 0.65rem; color: var(--win-dark-gray);">MANDO ARBITRO</span>
                 </div>
                 <div class="team-badge" style="background: var(--win-dark-gray);">J</div>
             </div>
@@ -228,10 +223,8 @@
                 <tr>
                     <th>POS</th>
                     <th style="text-align: left;">EQUIPO</th>
-                    <th>GOLES (+3)</th>
-                    <th>NEUTRAL (0)</th>
-                    <th>AUTOGOLES (-1)</th>
-                    <th>PTS TOTAL</th>
+                    <th>GOLES</th>
+                    <th>AUTOGOLES</th>
                 </tr>
             </thead>
             <tbody id="b-standingsBody"></tbody>
@@ -261,7 +254,7 @@
             <div style="margin-bottom: 12px; font-size: 1.1rem; color: var(--win-blue);">REGISTRAR NUEVA ACTIVIDAD</div>
 
             <div class="form-group">
-                <label>NOMBRE DE LA ACTIVIDAD (GOL PROPUETO):</label>
+                <label>NOMBRE DE LA ACTIVIDAD (GOL PROPUESTO):</label>
                 <input type="text" id="reg-titulo" placeholder="EJ: AUTOMATIZACION DE INFORMES">
             </div>
 
@@ -292,7 +285,7 @@
 
     </div>
 
-    <!-- CONTROLES MANDO ARBITRO -->
+    <!-- CONTROLES MANDO ARBITRO (EVALUACION CENTRALIZADA) -->
     <div class="psp-overlay-controls" id="psp-controls">
         <div class="d-pad-circle">
             <button class="d-pad-btn d-pad-left" onclick="cambiarEquipoTransmision(-1)">&lt;</button>
@@ -300,9 +293,10 @@
         </div>
 
         <div class="action-btns">
-            <button class="btn-psp" onclick="cambiarEquipoTransmision(-1)">&lt; EQ</button>
-            <button class="btn-psp" onclick="cambiarEquipoTransmision(1)">EQ &gt;</button>
-            <button class="btn-psp end-match" id="btn-endMatch" onclick="toggleFinalizarPartido()">FINALIZAR PARTIDO</button>
+            <button class="btn-psp gol" onclick="evaluarActividadesSeleccionada('gol')">+ GOL</button>
+            <button class="btn-psp neutral" onclick="evaluarActividadesSeleccionada('neutral')">NEUTRAL</button>
+            <button class="btn-psp autogol" onclick="evaluarActividadesSeleccionada('autogol')">+ AUTOGOL</button>
+            <button class="btn-psp end-match" id="btn-endMatch" onclick="toggleFinalizarPartido()">FINALIZAR</button>
         </div>
     </div>
 
@@ -322,7 +316,7 @@
             }
         });
 
-        let partido = { equipoIndex: 0 };
+        let partido = { equipoIndex: 0, actividadSeleccionadaIdx: 0 };
 
         function init() {
             renderTablaPosiciones();
@@ -376,7 +370,7 @@
                 desc: desc,
                 imgBefore: imgBefore,
                 imgAfter: imgAfter,
-                evaluacion: "pendiente" // pendiente, gol, autogol, neutral
+                evaluacion: "pendiente"
             });
 
             localStorage.setItem('WIN_SPORTS_EVAL_DB', JSON.stringify(DB));
@@ -420,6 +414,7 @@
 
         function cambiarEquipoTransmision(dir) {
             partido.equipoIndex = (partido.equipoIndex + dir + equiposBase.length) % equiposBase.length;
+            partido.actividadSeleccionadaIdx = 0;
             cargarEquipoATransmision();
         }
 
@@ -431,14 +426,11 @@
             document.getElementById('b-flag').textContent = eq.id;
             document.getElementById('b-flag').style.background = eq.color;
 
-            // Recalcular Marcador
             let goles = eqData.actividades.filter(a => a.evaluacion === 'gol').length;
             let autogoles = eqData.actividades.filter(a => a.evaluacion === 'autogol').length;
-            let puntos = (goles * 3) - (autogoles * 1);
 
             document.getElementById('b-goles').textContent = goles;
             document.getElementById('b-autogoles').textContent = autogoles;
-            document.getElementById('b-puntosTotal').textContent = puntos;
 
             const statusBadge = document.getElementById('b-statusBadge');
             const btnEnd = document.getElementById('btn-endMatch');
@@ -446,12 +438,12 @@
             if (eqData.partidoFinalizado) {
                 statusBadge.textContent = "PARTIDO FINALIZADO";
                 statusBadge.className = "badge-ended";
-                btnEnd.textContent = "REANUDAR PARTIDO";
+                btnEnd.textContent = "REANUDAR";
                 btnEnd.style.background = "var(--win-green)";
             } else {
                 statusBadge.textContent = "EN VIVO";
                 statusBadge.className = "badge-live";
-                btnEnd.textContent = "FINALIZAR PARTIDO";
+                btnEnd.textContent = "FINALIZAR";
                 btnEnd.style.background = "var(--win-red)";
             }
 
@@ -480,15 +472,14 @@
 
             actividades.forEach((act, idx) => {
                 const card = document.createElement('div');
-                card.className = 'broadcast-slide';
+                card.className = `broadcast-slide ${idx === partido.actividadSeleccionadaIdx ? 'selected' : ''}`;
                 card.style.borderLeftColor = eq.color;
+                card.onclick = () => seleccionarActividad(idx);
 
                 let ribbonHtml = "";
                 if (act.evaluacion !== 'pendiente') {
                     ribbonHtml = `<div class="ribbon ${act.evaluacion}">${act.evaluacion}</div>`;
                 }
-
-                let evalButtonsDisabled = eqData.partidoFinalizado ? 'disabled' : '';
 
                 card.innerHTML = `
                     ${ribbonHtml}
@@ -508,22 +499,22 @@
                             ${act.imgAfter ? `<img class="evidence-img" src="${act.imgAfter}">` : `<div class="evidence-img">SIN EVIDENCIA</div>`}
                         </div>
                     </div>
-
-                    <div class="eval-actions">
-                        <button class="btn-eval gol" ${evalButtonsDisabled} onclick="evaluarActividad(${idx}, 'gol')">+ GOL (+3)</button>
-                        <button class="btn-eval neutral" ${evalButtonsDisabled} onclick="evaluarActividad(${idx}, 'neutral')">NEUTRAL (0)</button>
-                        <button class="btn-eval autogol" ${evalButtonsDisabled} onclick="evaluarActividad(${idx}, 'autogol')">+ AUTOGOL (-1)</button>
-                    </div>
                 `;
                 feed.appendChild(card);
             });
         }
 
-        function evaluarActividad(actIdx, tipo) {
+        function seleccionarActividad(idx) {
+            partido.actividadSeleccionadaIdx = idx;
+            renderFeedVertical();
+        }
+
+        function evaluarActividadesSeleccionada(tipo) {
             const eq = equiposBase[partido.equipoIndex];
             if (DB[eq.id].partidoFinalizado) return;
+            if (!DB[eq.id].actividades[partido.actividadSeleccionadaIdx]) return;
 
-            DB[eq.id].actividades[actIdx].evaluacion = tipo;
+            DB[eq.id].actividades[partido.actividadSeleccionadaIdx].evaluacion = tipo;
             localStorage.setItem('WIN_SPORTS_EVAL_DB', JSON.stringify(DB));
 
             cargarEquipoATransmision();
@@ -545,28 +536,22 @@
             let ranking = equiposBase.map(e => {
                 let acts = DB[e.id].actividades;
                 let g = acts.filter(a => a.evaluacion === 'gol').length;
-                let n = acts.filter(a => a.evaluacion === 'neutral').length;
                 let ag = acts.filter(a => a.evaluacion === 'autogol').length;
-                let pts = (g * 3) - (ag * 1);
 
                 return {
                     ...e,
                     goles: g,
-                    neutrales: n,
-                    autogoles: ag,
-                    pts: pts
+                    autogoles: ag
                 };
-            }).sort((a, b) => b.pts - a.pts);
+            }).sort((a, b) => b.goles - a.goles || a.autogoles - b.autogoles);
 
             ranking.forEach((eq, idx) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${idx + 1}</td>
                     <td style="text-align:left;"><span style="color:${eq.color}">■</span> ${eq.nombre}</td>
-                    <td style="color:var(--win-green);">${eq.goles}</td>
-                    <td style="color:var(--win-neutral);">${eq.neutrales}</td>
-                    <td style="color:var(--win-red);">${eq.autogoles}</td>
-                    <td style="color:var(--win-orange); font-weight:bold;">${eq.pts}</td>
+                    <td style="color:var(--win-green); font-weight:bold;">${eq.goles}</td>
+                    <td style="color:var(--win-red); font-weight:bold;">${eq.autogoles}</td>
                 `;
                 tbody.appendChild(tr);
             });
